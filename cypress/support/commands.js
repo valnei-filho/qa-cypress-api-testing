@@ -8,9 +8,9 @@ Cypress.Commands.add('generateToken', () => {
 
     body: {
 
-      username: 'admin',
+      username: Cypress.env('username'),
 
-      password: 'password123',
+      password: Cypress.env('password'),
 
     },
 
@@ -31,6 +31,44 @@ Cypress.Commands.add('createBooking', () => {
       body: bookingData,
 
     });
+
+  });
+
+});
+
+Cypress.Commands.add('updateBooking', (bookingId, token, body) => {
+
+  return cy.request({
+
+    method: 'PUT',
+
+    url: `/booking/${bookingId}`,
+
+    headers: {
+
+      Cookie: `token=${token}`,
+
+    },
+
+    body,
+
+  });
+
+});
+
+Cypress.Commands.add('deleteBooking', (bookingId, token) => {
+
+  return cy.request({
+
+    method: 'DELETE',
+
+    url: `/booking/${bookingId}`,
+
+    headers: {
+
+      Cookie: `token=${token}`,
+
+    },
 
   });
 

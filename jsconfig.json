@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "types": ["cypress", "node"]
+  },
+  "include": [
+    "**/*.js",
+    "cypress/**/*.d.ts"
+  ]
+}
