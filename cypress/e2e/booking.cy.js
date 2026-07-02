@@ -37,47 +37,31 @@ describe('Booking API', () => {
 
   it('should create a new booking', () => {
 
+  cy.fixture('booking').then((bookingData) => {
+
     cy.request({
 
       method: 'POST',
 
       url: '/booking',
 
-      body: {
+      body: bookingData,
 
-        firstname: 'Valnei',
+      }).then((response) => {
 
-        lastname: 'Rezende',
+        expect(response.status).to.eq(200);
 
-        totalprice: 850,
+        expect(response.body).to.have.property('bookingid');
 
-        depositpaid: true,
+        expect(response.body.booking.firstname).to.eq(bookingData.firstname);
+        expect(response.body.booking.lastname).to.eq(bookingData.lastname);
+        expect(response.body.booking.totalprice).to.eq(bookingData.totalprice);
+        expect(response.body.booking.depositpaid).to.eq(bookingData.depositpaid);
+        expect(response.body.booking.additionalneeds).to.eq(bookingData.additionalneeds);
 
-        bookingdates: {
+        cy.log(JSON.stringify(response.body));
 
-          checkin: '2026-07-10',
-
-          checkout: '2026-07-15',
-
-        },
-
-        additionalneeds: 'Breakfast',
-
-      },
-
-    }).then((response) => {
-
-      expect(response.status).to.eq(200);
-
-      expect(response.body).to.have.property('bookingid');
-
-      expect(response.body.booking.firstname).to.eq('Valnei');
-      expect(response.body.booking.lastname).to.eq('Rezende');
-      expect(response.body.booking.totalprice).to.eq(850);
-      expect(response.body.booking.depositpaid).to.eq(true);
-      expect(response.body.booking.additionalneeds).to.eq('Breakfast');
-
-      cy.log(JSON.stringify(response.body));
+      });
 
     });
 
@@ -85,47 +69,23 @@ describe('Booking API', () => {
 
   it('should create and retrieve a booking', () => {
 
-    cy.request({
-
-      method: 'POST',
-
-      url: '/booking',
-
-      body: {
-
-        firstname: 'Valnei',
-
-        lastname: 'Rezende',
-
-        totalprice: 850,
-
-        depositpaid: true,
-
-        bookingdates: {
-
-          checkin: '2026-07-10',
-
-          checkout: '2026-07-15',
-
-        },
-
-        additionalneeds: 'Breakfast',
-
-      },
-
-    }).then((response) => {
+    cy.createBooking().then((response) => {
 
       const bookingId = response.body.bookingid;
 
-      cy.request(`/booking/${bookingId}`).then((bookingResponse) => {
+      cy.fixture('booking').then((bookingData) => {
 
-        expect(bookingResponse.status).to.eq(200);
+        cy.request(`/booking/${bookingId}`).then((bookingResponse) => {
 
-        expect(bookingResponse.body.firstname).to.eq('Valnei');
-        expect(bookingResponse.body.lastname).to.eq('Rezende');
-        expect(bookingResponse.body.totalprice).to.eq(850);
-        expect(bookingResponse.body.depositpaid).to.eq(true);
-        expect(bookingResponse.body.additionalneeds).to.eq('Breakfast');
+          expect(bookingResponse.status).to.eq(200);
+
+          expect(bookingResponse.body.firstname).to.eq(bookingData.firstname);
+          expect(bookingResponse.body.lastname).to.eq(bookingData.lastname);
+          expect(bookingResponse.body.totalprice).to.eq(bookingData.totalprice);
+          expect(bookingResponse.body.depositpaid).to.eq(bookingData.depositpaid);
+          expect(bookingResponse.body.additionalneeds).to.eq(bookingData.additionalneeds);
+
+        });
 
       });
 
@@ -135,23 +95,10 @@ describe('Booking API', () => {
 
   it('should generate auth token', () => {
 
-    cy.request({
-
-      method: 'POST',
-
-      url: '/auth',
-
-      body: {
-
-        username: 'admin',
-
-        password: 'password123',
-
-      },
-
-    }).then((response) => {
+    cy.generateToken().then((response) => {
 
       expect(response.status).to.eq(200);
+
       expect(response.body).to.have.property('token');
 
       cy.log(JSON.stringify(response.body));
@@ -162,23 +109,25 @@ describe('Booking API', () => {
 
   it('should update a booking', () => {
 
-    cy.request({
+  cy.request({
 
-      method: 'POST',
+    method: 'POST',
 
-      url: '/auth',
+    url: '/auth',
 
-      body: {
+    body: {
 
-        username: 'admin',
+      username: 'admin',
 
-        password: 'password123',
+      password: 'password123',
 
-      },
+    },
 
-    }).then((authResponse) => {
+  }).then((authResponse) => {
 
-      const token = authResponse.body.token;
+    const token = authResponse.body.token;
+
+    cy.fixture('booking').then((bookingData) => {
 
       cy.request({
 
@@ -186,27 +135,7 @@ describe('Booking API', () => {
 
         url: '/booking',
 
-        body: {
-
-          firstname: 'Valnei',
-
-          lastname: 'Rezende',
-
-          totalprice: 850,
-
-          depositpaid: true,
-
-          bookingdates: {
-
-            checkin: '2026-07-10',
-
-            checkout: '2026-07-15',
-
-          },
-
-          additionalneeds: 'Breakfast',
-
-        },
+        body: bookingData,
 
       }).then((createResponse) => {
 
@@ -270,25 +199,29 @@ describe('Booking API', () => {
 
   });
 
+});
+
   it('should delete a booking', () => {
 
-    cy.request({
+  cy.request({
 
-      method: 'POST',
+    method: 'POST',
 
-      url: '/auth',
+    url: '/auth',
 
-      body: {
+    body: {
 
-        username: 'admin',
+      username: 'admin',
 
-        password: 'password123',
+      password: 'password123',
 
-      },
+    },
 
-    }).then((authResponse) => {
+  }).then((authResponse) => {
 
-      const token = authResponse.body.token;
+    const token = authResponse.body.token;
+
+    cy.fixture('booking').then((bookingData) => {
 
       cy.request({
 
@@ -296,27 +229,7 @@ describe('Booking API', () => {
 
         url: '/booking',
 
-        body: {
-
-          firstname: 'Valnei',
-
-          lastname: 'Rezende',
-
-          totalprice: 850,
-
-          depositpaid: true,
-
-          bookingdates: {
-
-            checkin: '2026-07-10',
-
-            checkout: '2026-07-15',
-
-          },
-
-          additionalneeds: 'Breakfast',
-
-        },
+        body: bookingData,
 
       }).then((createResponse) => {
 
@@ -346,9 +259,11 @@ describe('Booking API', () => {
 
             failOnStatusCode: false,
 
-          }).then((getResponse) => {
+            }).then((getResponse) => {
 
-            expect(getResponse.status).to.eq(404);
+              expect(getResponse.status).to.eq(404);
+
+            });
 
           });
 
@@ -359,5 +274,4 @@ describe('Booking API', () => {
     });
 
   });
-
 });
